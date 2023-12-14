@@ -1,196 +1,241 @@
 #include <bits/stdc++.h>
 #include <chrono> 
 #include <random> 
+ 
 
-int generateRandomNumber(std::mt19937_64& rng, int lowerBound, int upperBound) 
+int randint(std::mt19937_64& rng, int lbound, int ubound) 
 { 
-        return rng() % (upperBound - lowerBound + 1) + lowerBound; 
+    return rng() % (ubound - lbound + 1) + lbound; 
 } 
-
 using namespace std;
 
-vector<long long> primeNumbers;
-vector<char> bufferCharacters = {'!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '+', '=', '}', '{', '|', '`'};
 
-vector<char> randomCharacters = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '_', '+', '=', ')', '(', '*', '&', '^', '%', '$', '#', '@', '!', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', '{', '}', ']', '|', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', ':', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '<', '>', '?', '/'};
+vector<long long>primes;
+vector<char>buffer_characters={'!','@','#','$','%','^','&','*','(',')','-','_','+','=','}','{','|','`'};
 
-vector<long long> sieveOfEratosthenes(int n) {
-        int* array = new int[n + 1](); 
-        vector<long long> resultVector; 
-        for (int i = 2; i <= n; i++) {
-                if (array[i] == 0) {
-                        resultVector.push_back(i); 
-                        for (int j = 2 * i; j <= n; j += i) {
-                                array[j] = 1;
-                        }
-                } 
-        }
-        return resultVector;
+vector<char>random_characters={'1','2','3','4','5','6','7','8','9','0','-','_','+','=',')','(','*','&','^','%','$','#','@','!','q','w','e','r','t','y','u','i','o','p','[','{','}',']','|','a','s','d','f','g','h','j','k','l',';',':','z','x','c','v','b','n','m','<','>','?','/'};
+vector<long long> sieve(int n) {
+    int*arr = new int[n + 1](); 
+    vector<long long> vect; 
+    for (int i = 2; i <= n; i++)
+        if (arr[i] == 0) {
+            vect.push_back(i); 
+            for (int j = 2 * i; j <= n; j += i)
+                arr[j] = 1;
+        } 
+    return vect;
 }
 
-long long modularExponentiation(long long base, long long exponent, long long modulus) {
-        if (exponent == 0) {
-                return 1;
-        }
-        long long result = modularExponentiation(base, exponent / 2, modulus) % modulus;
 
-        if (exponent & 1) {
-                return (result * result * base) % modulus;
-        }
-        else {
-                return (result * result) % modulus;
-        }
+long long binpow(long long a, long long b,long long m) {
+    if (b == 0){
+        return 1;
+    }
+    long long res = binpow(a, b / 2,m)%m;
+
+    if (b & 1){
+        return (res*res*a)%m;
+    }
+    else{
+        return (res*res)%m;
+    }
 }
 
-long long diffieHellmanKeyExchange(long long base, long long privateA, long long privateB){
-        long long primeModulus, publicKeyA, publicKeyB, secretKeyA, secretKeyB;
-        primeModulus = 7919;
-        publicKeyA = modularExponentiation(base, privateA, primeModulus);
-        publicKeyB = modularExponentiation(base, privateB, primeModulus); 
-        secretKeyA = modularExponentiation(publicKeyB, privateA, primeModulus); 
-        secretKeyB = modularExponentiation(publicKeyA, privateB, primeModulus); 
-        return secretKeyA;
+long long diffie_hellman(long long G,long long a,long long b){
+    long long int P, x, y, ka, kb;
+    P=7919;
+    x = binpow(G, a, P);
+    y = binpow(G, b, P); 
+    ka = binpow(y, a, P); 
+    kb = binpow(x, b, P); 
+    // cout << ka << " " << kb << endl;
+    return ka;
+
 }
 
-string addBufferCharacters(long long key){
-        long long invertedNumber = 0;
-        long long bufferCharactersCount = bufferCharacters.size();
-        string bufferString = "";
-        for (int i = 62; i >= 0; i--) {
-                if ((key >> i) & 1){
-                }
-                else {
-                        invertedNumber += (1LL << i);
-                }
+
+string add_buffer(long long key){
+    long long inverted_number=0;
+    long long buffer_characters_count=buffer_characters.size();
+    string buffer_string="";
+    for (int i=62;i>=0;i--){
+        if ((key>>i) & 1){
         }
-        long long difference = key - invertedNumber;
-        if (difference < 0) {
-                difference *= -1;
+        else{
+            inverted_number+=(1LL<<i);
         }
-        long long startIndex = invertedNumber % bufferCharactersCount;
-        long long endIndex = difference % bufferCharactersCount;
-        bufferString += bufferCharacters[startIndex];
-        int randomNumber = rand();
-        randomNumber %= 25;
-        while (randomNumber > 0) {
-                int left = 0;
-                int right = randomCharacters.size();
-                int index = rand();
-                index %= randomCharacters.size();
-                if (randomCharacters[index] != bufferCharacters[startIndex] && randomCharacters[index] != bufferCharacters[endIndex]) {
-                        bufferString += randomCharacters[index];
-                        randomNumber--;
-                }
+    }
+    long long diff=key-inverted_number;
+    if (diff<0){
+        diff*=-1;
+    }
+    long long start_index=inverted_number%buffer_characters_count;
+    long long end_index=diff%buffer_characters_count;
+    buffer_string+=buffer_characters[start_index];
+    // cout << buffer_characters[start_index] << " " << buffer_characters[end_index] << endl;
+    int random_number=rand();
+    random_number%=25;
+    while(random_number>0){
+        int l=0;
+        int r=random_characters.size();
+        int idx=rand();
+        idx%=random_characters.size();
+        if (random_characters[idx]!=buffer_characters[start_index] && random_characters[idx]!=buffer_characters[end_index]){
+            buffer_string+=random_characters[idx];
+            random_number--;
         }
-        bufferString += bufferCharacters[endIndex];
-        return bufferString;
+
+
+    }
+    buffer_string+=buffer_characters[end_index];
+
+
+
+
+    
+
+
+    return buffer_string;
+
+
 }
 
-vector<char> calculateStartAndEndCharacters(long long key){
-        long long invertedNumber = 0;
-        long long bufferCharactersCount = bufferCharacters.size();
-        string bufferString = "";
-        for (int i = 62; i >= 0; i--) {
-                if ((key >> i) & 1){
-                }
-                else {
-                        invertedNumber += (1LL << i);
-                }
+
+vector<char> calculate_start_and_end(long long key){
+    long long inverted_number=0;
+    long long buffer_characters_count=buffer_characters.size();
+    string buffer_string="";
+    for (int i=62;i>=0;i--){
+        if ((key>>i) & 1){
         }
-        long long difference = key - invertedNumber;
-        if (difference < 0) {
-                difference *= -1;
+        else{
+            inverted_number+=(1LL<<i);
         }
-        long long startIndex = invertedNumber % bufferCharactersCount;
-        long long endIndex = difference % bufferCharactersCount;
-        return {bufferCharacters[startIndex], bufferCharacters[endIndex]};
+    }
+    long long diff=key-inverted_number;
+    if (diff<0){
+        diff*=-1;
+    }
+    long long start_index=inverted_number%buffer_characters_count;
+    long long end_index=diff%buffer_characters_count;
+    return {buffer_characters[start_index],buffer_characters[end_index]};
 }
 
-string encryptMessage(string message, long long key){
-        int messageLength = message.length();
-        int primesCount = primeNumbers.size();
-        string encryptedText = "";
-        int j = 0;
-        long long currentIndex = key + ((key >> j & 1) << (j));
-        long long skips = key + ((key >> j & 1) << (j));
-        currentIndex = currentIndex % primesCount;
-        int i = 0;
-        while (i < messageLength) {
-                long long multiplication = primeNumbers[currentIndex] * int(message[i]);
-                string multiplicationString = to_string(multiplication);
-                encryptedText += multiplicationString;
-                encryptedText += addBufferCharacters(skips);
-                j++;
-                i++;
-                if (j == 63) {
-                        j = 0;
-                }
-                skips = key + ((key >> j & 1) << (j));
-                currentIndex += skips;
-                currentIndex = currentIndex % primesCount;
+
+string encrypt(string message,long long key){
+    int n=message.length();
+    int primes_count=primes.size();
+    string encrypted_text="";
+    int j=0;
+    long long current_index=key+((key>>j & 1)<<(j));
+    long long skips=key+((key>>j & 1)<<(j));
+    current_index=current_index%primes_count;
+    int i=0;
+    // encrypted_text+=add_buffer(skips);
+    while(i<n){
+        long long multiplication=primes[current_index]*int(message[i]);
+        string multiplication_string=to_string(multiplication);
+        encrypted_text+=multiplication_string;
+        encrypted_text+=add_buffer(skips);
+        j++;
+        i++;
+        if (j==63){
+            j=0;
         }
-        return encryptedText;
+        skips=key+((key>>j & 1)<<(j));
+        current_index+=skips;
+        current_index=current_index%primes_count;
+
+    }
+    return encrypted_text;
+
+
 }
 
-string decryptMessage(string cypher, long long key){
-        int cypherLength = cypher.length();
-        int primesCount = primeNumbers.size();
-        string decryptedText = "";
-        int j = 0;
-        long long currentIndex = key + ((key >> j & 1) << (j));
-        long long skips = key + ((key >> j & 1) << (j));
-        currentIndex = currentIndex % primesCount;
-        int i = 0;
-        string number = "";
-        while (i < cypherLength && cypher[i] >= '0' && cypher[i] <= '9') {
-                number += cypher[i];
-                i++;
+string decrypt(string cypher,long long key){
+    int n=cypher.length();
+    int primes_count=primes.size();
+    string decrypted_text="";
+
+    int j=0;
+    long long current_index=key+((key>>j & 1)<<(j));
+    long long skips=key+((key>>j & 1)<<(j));
+    current_index=current_index%primes_count;
+    int i=0;
+    string num="";
+    while(i<n && cypher[i]>='0' && cypher[i]<='9'){
+        num+=cypher[i];
+        i++;
+
+    }
+    // cout << num << endl;
+    long long d=stoll(num);
+    long long current_prime_number=primes[current_index];
+    d=d/current_prime_number;
+    decrypted_text+=char(d);
+    vector<char>start_and_end=calculate_start_and_end(skips);
+    // cout << start_and_end[0] << " " << start_and_end[1] << endl;
+    while(cypher[i]!=start_and_end[1]){
+        i++;
+    }
+    i++;
+    while(i<n){
+        string num="";
+        while(i<n && cypher[i]>='0' && cypher[i]<='9'){
+            num+=cypher[i];
+            i++;
         }
-        long long d = stoll(number);
-        long long currentPrimeNumber = primeNumbers[currentIndex];
-        d = d / currentPrimeNumber;
-        decryptedText += char(d);
-        vector<char> startAndEnd = calculateStartAndEndCharacters(skips);
-        while (cypher[i] != startAndEnd[1]) {
-                i++;
+        // cout << num << endl;
+        long long number=stoll(num);
+        j++;
+        if (j==63){
+            j=0;
+        }
+        skips=key+((key>>j & 1)<<(j));
+        current_index+=skips;
+        current_index=current_index%primes_count;
+        long long current_prime_number=primes[current_index];
+        number=number/current_prime_number;
+        decrypted_text+=char(number);
+        start_and_end=calculate_start_and_end(skips);
+        // cout << start_and_end[0] << " " << start_and_end[1] << endl;
+        while(cypher[i]!=start_and_end[1]){
+            i++;
         }
         i++;
-        while (i < cypherLength) {
-                string number = "";
-                while (i < cypherLength && cypher[i] >= '0' && cypher[i] <= '9') {
-                        number += cypher[i];
-                        i++;
-                }
-                long long numberValue = stoll(number);
-                j++;
-                if (j == 63) {
-                        j = 0;
-                }
-                skips = key + ((key >> j & 1) << (j));
-                currentIndex += skips;
-                currentIndex = currentIndex % primesCount;
-                long long currentPrimeNumber = primeNumbers[currentIndex];
-                numberValue = numberValue / currentPrimeNumber;
-                decryptedText += char(numberValue);
-                startAndEnd = calculateStartAndEndCharacters(skips);
-                while (cypher[i] != startAndEnd[1]) {
-                        i++;
-                }
-                i++;
-        }
-        return decryptedText;
+
+    }
+    return decrypted_text;
+
+
+
 }
+
+
+
+
+
+
+
+
+
 
 int main()
 {
-        int maxNumber = 1e6;
-        primeNumbers = sieveOfEratosthenes(maxNumber);
-        unsigned long long secretKey = diffieHellmanKeyExchange(7911, 1567689892, 292787734);
-        string message;
-        getline(cin, message);
-        string encryptedText = encryptMessage(message, secretKey);
-        cout << encryptedText << endl;
-        string decryptedText = decryptMessage(encryptedText, secretKey);
-        cout << decryptedText << endl;
-        return 0;
+    int N=1e6;
+    primes=sieve(N);
+    unsigned long long key=diffie_hellman(7911,1567689892,292787734);
+    string message="";
+    string curr;
+    while(getline(cin,curr)){
+        message+=curr;
+        message+="\n";
+
+    }
+    string encrypted_text=encrypt(message,key);
+    cout << encrypted_text << endl;
+    string decrypted_text=decrypt(encrypted_text,key);
+    cout << decrypted_text << endl;
+
+    return 0;
 }
